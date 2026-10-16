@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GHI Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&display=swap">
+<style>
+html,body{margin:0}[hidden]{display:none!important}
+/* Layout: a field instrument in University of Edinburgh colours. Blue header band + tabs; each tool is a two-column worksheet (inputs left, live verdict right), stacking on phones. */
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --surface-2: #eef2f6;
+  --ink: #041e42;             /* University blue */
+  --ink-2: #333f48;           /* Spruce grey */
+  --ink-3: #66717b;
+  --line: #d8dee6;
+  --brand: #041e42;           /* University blue */
+  --brand-ink: #ffffff;
+  --brand-ink-2: #c9d3e0;
+  --accent: #007288;          /* Bright blue */
+  --accent-ink: #ffffff;
+  --gill: #d50032;            /* University red */
+  --t-none: #8a929a;
+  --t-suspect: #487a7b;       /* Jade */
+  --t-probable: #830065;      /* Purple */
+  --t-confirmed: #d50032;     /* University red */
+  --t-multi: #004f71;         /* Muted blue */
+  --band-low: #154734;        /* Dark green */
+  --band-mod: #007288;        /* Bright blue */
+  --band-high: #d50032;       /* University red */
+  --chip-bg: #e6edf3;
+  --focus: #007288;
+  --f-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #06111f; --surface: #0b1b30; --surface-2: #112743; --ink: #e8eef6; --ink-2: #b6c2cf; --ink-3: #8996a4; --line: #1e3456;
+    --brand: #041e42; --brand-ink: #ffffff; --brand-ink-2: #b7c4d6; --accent: #4fb6c8; --accent-ink: #04202a; --gill: #ff5a78;
+    --t-none: #8a96a3; --t-suspect: #7fb7b8; --t-probable: #d46cbd; --t-confirmed: #ff5a78; --t-multi: #5fa8d3;
+    --band-low: #55b083; --band-mod: #4fb6c8; --band-high: #ff5a78; --chip-bg: #15304f; --focus: #4fb6c8;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #06111f; --surface: #0b1b30; --surface-2: #112743; --ink: #e8eef6; --ink-2: #b6c2cf; --ink-3: #8996a4; --line: #1e3456;
+  --brand: #041e42; --brand-ink: #ffffff; --brand-ink-2: #b7c4d6; --accent: #4fb6c8; --accent-ink: #04202a; --gill: #ff5a78;
+  --t-none: #8a96a3; --t-suspect: #7fb7b8; --t-probable: #d46cbd; --t-confirmed: #ff5a78; --t-multi: #5fa8d3;
+  --band-low: #55b083; --band-mod: #4fb6c8; --band-high: #ff5a78; --chip-bg: #15304f; --focus: #4fb6c8;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 650; text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(28px, 4vw, 40px); letter-spacing: -0.01em; }
+h2 { font-size: 22px; }
+h3 { font-size: 17px; }
+p { margin: 0; }
+a { color: var(--accent); }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--ink-2); }
+.small { font-size: 13px; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+
+header.top { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: flex-end; justify-content: space-between; padding: 26px 28px; border-radius: var(--r); background: var(--brand); color: var(--brand-ink); border-top: 5px solid #d50032; }
+header.top .eyebrow { color: var(--brand-ink-2); }
+header.top h1 { color: var(--brand-ink); }
+header.top .lede { max-width: 62ch; color: var(--brand-ink-2); margin-top: 8px; }
+.status { display: inline-flex; gap: 8px; align-items: center; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.22); font-size: 13px; color: var(--brand-ink-2); }
+.status b { color: #ffffff; background: #d50032; padding: 1px 8px; border-radius: 999px; font-weight: 600; }
+
+nav.tabs { display: flex; gap: 4px; margin-top: 18px; overflow-x: auto; scrollbar-width: none; }
+nav.tabs button { font: inherit; font-weight: 500; background: none; border: 0; color: var(--ink-2); padding: 10px 14px; border-radius: 8px 8px 0 0; cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; }
+nav.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--gill); font-weight: 600; }
+nav.tabs button:hover { color: var(--ink); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+section.panel { margin-top: 24px; }
+.grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.sheet { display: grid; gap: 18px; }
+fieldset { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); padding: 16px 18px 18px; margin: 0; min-width: 0; }
+legend { font-family: var(--f-display); font-weight: 650; font-size: 17px; padding: 0 6px; margin-left: -6px; }
+.legend-note { font-size: 13px; color: var(--ink-3); margin: -2px 0 12px; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(150px, 220px); gap: 8px 16px; align-items: center; padding: 8px 0; border-top: 1px dashed var(--line); }
+.row:first-of-type { border-top: 0; }
+.row label { font-weight: 500; }
+.row .hint { display: block; font-size: 12.5px; color: var(--ink-3); font-weight: 400; }
+@media (max-width: 520px) { .row { grid-template-columns: minmax(0, 1fr); } }
+select, input[type="number"] { font: inherit; width: 100%; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); color: var(--ink); }
+input[type="number"] { font-family: var(--f-mono); }
+.checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 16px; }
+.checks label { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; }
+.checks input { margin-top: 4px; accent-color: var(--accent); }
+
+.agents { width: 100%; border-collapse: collapse; font-size: 14px; }
+.agents th { text-align: left; font-weight: 600; font-size: 12px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; padding: 4px 6px 8px; }
+.agents td { padding: 6px; border-top: 1px dashed var(--line); vertical-align: middle; }
+.agents td:first-child { font-weight: 500; }
+.agents .cond { display: block; font-size: 12px; color: var(--ink-3); font-weight: 400; }
+.agents input[type="number"] { width: 80px; }
+.tablewrap { overflow-x: auto; }
+
+aside.verdict { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: grid; gap: 14px; }
+@media (max-width: 860px) { aside.verdict { position: static; } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; }
+.tier { display: grid; gap: 10px; }
+.tier-badge { display: inline-flex; align-items: center; gap: 10px; font-family: var(--f-display); font-size: 26px; font-weight: 650; line-height: 1.1; }
+.tier-badge .dot { width: 14px; height: 14px; border-radius: 50%; flex: none; background: var(--c); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 22%, transparent); }
+.ladder { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 4px; }
+.ladder span { height: 8px; border-radius: 4px; background: var(--surface-2); }
+.ladder span.on { background: var(--c); }
+.ladder-labels { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; font-size: 11px; color: var(--ink-3); }
+ul.reasons { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; font-size: 14px; }
+ul.reasons li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 6px; }
+ul.reasons li::before { content: attr(data-mark); font-family: var(--f-mono); color: var(--ink-3); }
+ul.reasons li.ok::before { color: var(--accent); }
+ul.reasons li.gap::before { color: var(--t-suspect); }
+.actions { border-left: 3px solid var(--accent); padding-left: 12px; }
+
+.score { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.score .num { font-family: var(--f-mono); font-size: 48px; font-weight: 500; line-height: 1; }
+.band-pill { display: inline-flex; padding: 4px 12px; border-radius: 999px; font-weight: 600; font-size: 14px; color: var(--accent-ink); background: var(--c); }
+.meter { position: relative; height: 10px; border-radius: 5px; background: linear-gradient(90deg, var(--band-low) 0 var(--l), var(--band-mod) var(--l) var(--m), var(--band-high) var(--m) 100%); opacity: .85; margin: 14px 0 4px; }
+.meter i { position: absolute; top: -5px; width: 4px; height: 20px; border-radius: 2px; background: var(--ink); transform: translateX(-2px); transition: left .2s; }
+.contrib { display: grid; gap: 6px; font-size: 13.5px; }
+.contrib .c { display: grid; grid-template-columns: minmax(0, 1fr) 64px 34px; gap: 8px; align-items: center; }
+.contrib .bar { height: 8px; border-radius: 4px; background: var(--surface-2); position: relative; overflow: hidden; }
+.contrib .bar b { position: absolute; top: 0; bottom: 0; left: 0; background: var(--gill); border-radius: 4px; }
+.contrib .bar b.neg { background: var(--band-low); }
+.contrib .pts { font-family: var(--f-mono); text-align: right; }
+
+.factor { display: grid; grid-template-columns: minmax(0, 1fr) minmax(170px, 250px); gap: 6px 16px; align-items: center; padding: 10px 0; border-top: 1px dashed var(--line); }
+.factor:first-of-type { border-top: 0; }
+@media (max-width: 520px) { .factor { grid-template-columns: minmax(0, 1fr); } }
+.factor .name { font-weight: 500; }
+.factor .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 3px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--chip-bg); color: var(--ink-2); }
+.chip.g-strong { color: var(--accent); font-weight: 600; }
+.chip.g-limited { color: var(--ink-3); }
+.chip.linked { background: color-mix(in srgb, var(--gill) 15%, transparent); color: var(--gill); font-weight: 600; }
+
+details.settings { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); padding: 12px 16px; }
+details.settings summary { cursor: pointer; font-weight: 600; }
+details.settings[open] summary { margin-bottom: 10px; }
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 18px; }
+.settings-grid label { display: grid; gap: 4px; font-size: 13.5px; }
+.pts-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.pts-table td, .pts-table th { padding: 5px 6px; border-top: 1px dashed var(--line); text-align: left; }
+.pts-table th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); border-top: 0; }
+.pts-table input { width: 70px; }
+.btn { font: inherit; font-weight: 500; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer; }
+.btn.primary { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+textarea { width: 100%; min-height: 150px; font-family: var(--f-mono); font-size: 12.5px; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); resize: vertical; }
+.note { font-size: 13px; color: var(--ink-2); background: var(--surface-2); border-radius: 8px; padding: 10px 12px; }
+.example-flag { font-size: 12px; font-weight: 600; color: var(--t-suspect); }
+
+.tiers-def { display: grid; gap: 12px; }
+.tdef { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 12px 20px; padding: 14px 0; border-top: 1px solid var(--line); }
+.tdef:first-child { border-top: 0; }
+.tdef .h { display: flex; gap: 10px; align-items: center; font-family: var(--f-display); font-weight: 650; font-size: 17px; }
+.tdef .h .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--c); flex: none; }
+@media (max-width: 640px) { .tdef { grid-template-columns: minmax(0, 1fr); } }
+.ev { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 760px; }
+.ev th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); padding: 8px; border-bottom: 1px solid var(--line); }
+.ev td { padding: 9px 8px; border-bottom: 1px dashed var(--line); vertical-align: top; }
+.ev td:first-child { font-weight: 500; }
+.dir-up { color: var(--gill); font-weight: 600; }
+.dir-down { color: var(--band-low); font-weight: 600; }
+footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-3); display: grid; gap: 6px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Gill Health Initiative · farmed salmonids</div>
+      <h1>GHI Calculator</h1>
+      <p class="lede">Classify a gill sample with the draft tiered case definition, then score a cage's short-term risk from the factors the literature links to gill disease. Both halves share one outcome: the case definition.</p>
+    </div>
+    <div class="status"><b>Draft v0.1</b> for expert review · thresholds and points are not yet validated</div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" id="tab-case" aria-controls="p-case" aria-selected="true" data-tab="case">1 · Case definition</button>
+    <button role="tab" id="tab-risk" aria-controls="p-risk" aria-selected="false" data-tab="risk">2 · Risk calculator</button>
+    <button role="tab" id="tab-tiers" aria-controls="p-tiers" aria-selected="false" data-tab="tiers">Tier criteria</button>
+    <button role="tab" id="tab-evidence" aria-controls="p-evidence" aria-selected="false" data-tab="evidence">Evidence</button>
+  </nav>
+
+  <!-- ============ CASE DEFINITION ============ -->
+  <section class="panel" id="p-case" role="tabpanel" aria-labelledby="tab-case">
+    <div class="grid">
+      <form class="sheet" id="caseForm" autocomplete="off">
+        <p class="example-flag" id="caseExample">Example sample loaded: AGD outbreak cage, autumn. Replace with your own observations.</p>
+
+        <fieldset>
+          <legend>Clinical and production signs</legend>
+          <p class="legend-note">Cage- or tank-level observations at the time of sampling.</p>
+          <div class="checks">
+            <label><input type="checkbox" id="c_resp"> Increased respiratory rate, flared opercula or gasping</label>
+            <label><input type="checkbox" id="c_mort"> Mortality above the site's usual weekly level</label>
+            <label><input type="checkbox" id="c_app"> Reduced appetite</label>
+            <label><input type="checkbox" id="c_leth"> Lethargy or fish at the surface</label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Gross gill examination</legend>
+          <p class="legend-note">Score the worst-affected gill side.</p>
+          <div class="row">
+            <label for="g_scale">Scale<span class="hint">AGD 0-5 white mucoid patches (Taylor et al. 2009) or total gill score for all lesions (Fridman et al. 2021)</span></label>
+            <select id="g_scale">
+              <option value="agd">AGD gill score</option>
+              <option value="total">Total gross gill score</option>
+            </select>
+          </div>
+          <div class="row">
+            <label for="g_score">Gross gill score</label>
+            <select id="g_score">
+              <option value="">Not examined</option>
+              <option value="0">0 · clear</option>
+              <option value="1">1 · very light</option>
+              <option value="2">2 · light</option>
+              <option value="3">3 · moderate</option>
+              <option value="4">4 · advanced</option>
+              <option value="5">5 · heavy</option>
+            </select>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Histopathology</legend>
+          <p class="legend-note">Grade each lesion 0-3 (none, mild, moderate, severe), as in semi-quantitative schemes such as Mitchell et al. 2012 and Amlie et al. 2025.</p>
+          <div class="row"><label for="h_hyp">Epithelial hyperplasia or lamellar fusion</label><select id="h_hyp" class="hsel"></select></div>
+          <div class="row"><label for="h_inf">Inflammation</label><select id="h_inf" class="hsel"></select></div>
+          <div class="row"><label for="h_nec">Necrosis or epithelial sloughing</label><select id="h_nec" class="hsel"></select></div>
+          <div class="row"><label for="h_circ">Circulatory change<span class="hint">thrombi, telangiectasia, haemorrhage</span></label><select id="h_circ" class="hsel"></select></div>
+          <div class="row"><label for="h_ext">Filaments affected (%)</label><input type="number" id="h_ext" min="0" max="100" step="1" placeholder="not recorded"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Agent detection</legend>
+          <p class="legend-note">qPCR on gill tissue (leave Ct empty if not tested). In situ = ISH or IHC shows the agent within the lesion.</p>
+          <div class="tablewrap">
+            <table class="agents" id="agentTable">
+              <thead><tr><th>Agent</th><th>qPCR</th><th>Ct</th><th>In situ</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Context</legend>
+          <p class="legend-note">Recorded with every case; used to flag non-infectious causes.</p>
+          <div class="checks">
+            <label><input type="checkbox" id="x_treat"> Delousing, bath or chemical treatment in the last 14 days</label>
+            <label><input type="checkbox" id="x_net"> In-situ net cleaning in the last 7 days</label>
+            <label><input type="checkbox" id="x_plank"> Jellyfish, hydrozoan or algal bloom recorded in the last 14 days</label>
+            <label><input type="checkbox" id="x_fw"> Freshwater or RAS stage</label>
+          </div>
+        </fieldset>
+
+        <details class="settings" id="caseSettings">
+          <summary>Case-definition thresholds</summary>
+          <div class="settings-grid">
+            <label>Gross score for suspect case (≥)<input type="number" id="s_gross" min="1" max="5" step="1"></label>
+            <label>Histology grade counted as compatible (≥)<input type="number" id="s_histo" min="1" max="3" step="1"></label>
+            <label>Filaments affected counted as compatible (≥ %)<input type="number" id="s_ext" min="1" max="100" step="1"></label>
+            <label>qPCR positive below Ct<input type="number" id="s_ctpos" min="20" max="45" step="0.5"></label>
+            <label>High load at or below Ct<input type="number" id="s_cthigh" min="15" max="40" step="0.5"></label>
+          </div>
+          <p class="small muted" style="margin-top:10px">Defaults are placeholders for the Delphi panel. Ct cut-offs depend on the assay; set them per laboratory.</p>
+        </details>
+      </form>
+
+      <aside class="verdict" aria-live="polite">
+        <div class="card tier" id="tierCard">
+          <div class="eyebrow">Case status</div>
+          <div class="tier-badge" id="tierBadge"><span class="dot"></span><span id="tierText">-</span></div>
+          <div>
+            <div class="ladder" id="ladder"><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="ladder-labels"><span>Not a case</span><span>Suspect</span><span>Probable</span><span>Confirmed</span><span>Multifactorial</span></div>
+          </div>
+          <p id="tierSub" class="muted"></p>
+        </div>
+        <div class="card">
+          <h3>Why</h3>
+          <ul class="reasons" id="reasons" style="margin-top:10px"></ul>
+        </div>
+        <div class="card">
+          <h3>Next step</h3>
+          <p class="actions" id="caseAction" style="margin-top:10px"></p>
+        </div>
+        <div class="btn-row">
+          <button class="btn" type="button" id="toRisk">Use this status in the risk calculator →</button>
+          <button class="btn" type="button" id="caseClear">Clear sample</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ RISK CALCULATOR ============ -->
+  <section class="panel" id="p-risk" role="tabpanel" aria-labelledby="tab-risk" hidden>
+    <div class="grid">
+      <form class="sheet" id="riskForm" autocomplete="off">
+        <p class="example-flag">Example cage loaded: 450 g post-smolts, 13 °C, net cleaned 4 days ago. Replace with your own cage.</p>
+        <div id="factorGroups" class="sheet"></div>
+        <details class="settings">
+          <summary>Points and risk bands</summary>
+          <div class="settings-grid" style="margin-bottom:14px">
+            <label>Low risk up to (points)<input type="number" id="s_low" step="1"></label>
+            <label>Moderate risk up to (points)<input type="number" id="s_mod" step="1"></label>
+          </div>
+          <div class="tablewrap"><table class="pts-table" id="ptsTable"><thead><tr><th>Factor</th><th>Answer</th><th>Points</th></tr></thead><tbody></tbody></table></div>
+          <p class="small muted" style="margin-top:10px">Default points start from the evidence grade (3 for two or more supporting field studies, 2 for one field study, 1 for experimental evidence only; negative for protective factors) and are lowered where factors overlap: season with temperature, co-infection with N. perurans. Replace them with weights agreed by the expert panel.</p>
+        </details>
+      </form>
+
+      <aside class="verdict" aria-live="polite">
+        <div class="card">
+          <div class="eyebrow">Relative risk score, next 2-4 weeks</div>
+          <div class="score" style="margin-top:8px"><span class="num" id="scoreNum">0</span><span class="band-pill" id="bandPill">Low</span></div>
+          <div class="meter" id="meter"><i id="meterMark"></i></div>
+          <div class="ladder-labels mono" id="meterScale" style="grid-template-columns:1fr 1fr 1fr"></div>
+          <p class="small muted" style="margin-top:10px">A points score, not a probability. It ranks cages for attention until a model fitted to farm data replaces it.</p>
+        </div>
+        <div class="card">
+          <h3>What drives the score</h3>
+          <div class="contrib" id="contrib" style="margin-top:12px"></div>
+        </div>
+        <div class="card">
+          <h3>Suggested surveillance</h3>
+          <p class="actions" id="riskAction" style="margin-top:10px"></p>
+        </div>
+        <div class="card">
+          <h3>Summary</h3>
+          <textarea id="summary" readonly aria-label="Assessment summary"></textarea>
+          <div class="btn-row" style="margin-top:8px">
+            <button class="btn primary" type="button" id="copyBtn">Copy summary</button>
+            <span class="small muted" id="copyMsg" role="status"></span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ TIERS ============ -->
+  <section class="panel" id="p-tiers" role="tabpanel" aria-labelledby="tab-tiers" hidden>
+    <div class="card">
+      <h2>Draft tiered case definition</h2>
+      <p class="muted" style="margin-top:6px;max-width:72ch">Built from the three lines of evidence measured in the 2007-2026 literature review: gross or clinical signs, a compatible lesion, and the agent within the lesion. Only 6% of 231 disease-focused articles reported all three. Thresholds in brackets are the current defaults and can be changed in the case tab.</p>
+      <div class="tiers-def" style="margin-top:16px" id="tierDefs"></div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <h3>Recorded at every tier</h3>
+      <p class="muted" style="margin-top:6px;max-width:72ch">Production stage (freshwater, RAS or sea), water temperature and salinity, plankton and jellyfish events, treatments and net cleaning in the previous two weeks, and the scales and assays used. These records are what make cases comparable across farms and countries, and they are the inputs of the risk calculator.</p>
+    </div>
+  </section>
+
+  <!-- ============ EVIDENCE ============ -->
+  <section class="panel" id="p-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden>
+    <div class="card">
+      <h2>Evidence behind each factor</h2>
+      <p class="muted" style="margin-top:6px;max-width:75ch">From the screening of 319 articles (2007-2026; WoS, Scopus, PubMed) and extraction of 189 risk-factor findings, of which 82 were field associations. Effects come from abstracts and use different outcome definitions, so they indicate direction, not comparable magnitudes.</p>
+      <div class="tablewrap" style="margin-top:14px">
+        <table class="ev" id="evTable">
+          <thead><tr><th>Factor</th><th>Direction</th><th>Grade</th><th>Reported effect</th><th>Sources</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <h3>Case-definition sources</h3>
+      <ul id="cdRefs" class="small" style="margin:10px 0 0;padding-left:18px;display:grid;gap:6px"></ul>
+    </div>
+  </section>
+
+  <footer>
+    <span>Draft tool for the GHI review (Mardones et al., in preparation). Not for diagnostic or regulatory use until thresholds and points are agreed and validated.</span>
+    <span>Your edits to thresholds and points are kept in this browser only. <button class="btn" type="button" id="resetAll" style="padding:4px 10px;font-size:12.5px">Reset all to defaults</button> <span id="resetMsg" role="status"></span></span>
+  </footer>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  // ---------------- references ----------------
+  const REFS = {
+    taylor09: { c: "Taylor et al. 2009, Aquaculture", doi: "10.1016/j.aquaculture.2009.01.030", n: "Gross gill score vs histology under repeated field AGD exposure" },
+    taylor09g: { c: "Taylor et al. 2009, Aquaculture", doi: "10.1016/j.aquaculture.2009.06.007", n: "Heritability of gross gill score and survival" },
+    mitchell12: { c: "Mitchell et al. 2012, Aquacult Int", doi: "10.1007/s10499-012-9504-x", n: "Histopathological gill scoring protocol, longitudinal farm study; jellyfish" },
+    gjessing19: { c: "Gjessing et al. 2019, PLoS One", doi: "10.1371/journal.pone.0222926", n: "Histopathology of complex gill disease" },
+    amlie25: { c: "Amlie et al. 2025, J Vet Diagn Invest", doi: "10.1177/10406387241310900", n: "Semi-quantitative scoring of mild-to-moderate lesions in RAS" },
+    boerlage22: { c: "Boerlage et al. 2022, Prev Vet Med", doi: "10.1016/j.prevetmed.2022.105654", n: "Field DSe/DSp of AGD and CGD tests (latent class)" },
+    herrero22: { c: "Herrero et al. 2022, Pathogens", doi: "10.3390/pathogens11080878", n: "Longitudinal study of putative CGD agents" },
+    downes15: { c: "Downes et al. 2015, Aquacult Environ Interact", doi: "10.3354/aei00150", n: "Longitudinal AGD qPCR monitoring; freshwater bath" },
+    downes18: { c: "Downes et al. 2018, J Fish Dis", doi: "10.1111/jfd.12814", n: "Co-infections during an AGD outbreak" },
+    fridman21: { c: "Fridman et al. 2021, Microorganisms", doi: "10.3390/microorganisms9122605", n: "Total gross gill scoring system, Chile" },
+    jones22: { c: "Jones et al. 2022, Microorganisms", doi: "10.3390/microorganisms10051039", n: "Temperature and N. perurans exacerbate CGD, Canada" },
+    kintner19: { c: "Kintner & Brierley 2019, J Mar Biol Assoc UK", doi: "10.1017/s002531541800022x", n: "Hydrozoan blooms and gill health; >12 °C" },
+    rozas12: { c: "Rozas et al. 2012, Bull Eur Assoc Fish Pathol", doi: "", n: "AGD epidemiology in Chile 2007-2011" },
+    ostevik21: { c: "Østevik et al. 2021, Aquaculture", doi: "10.1016/j.aquaculture.2021.737203", n: "In-situ net cleaning and gill health" },
+    ostevik22: { c: "Østevik et al. 2022, Aquaculture", doi: "10.1016/j.aquaculture.2022.738019", n: "Thermal and mechanical delousing and gill health" },
+    elsh23: { c: "Elsheshtawy et al. 2023, Front Aquacult", doi: "10.3389/faquc.2023.1125595", n: "Net cleaning and microbiome dysbiosis" },
+    elsh24: { c: "Elsheshtawy et al. 2024, Aquaculture", doi: "10.1016/j.aquaculture.2023.740455", n: "Thermal delousing and gill microbiome" },
+    baxter11: { c: "Baxter et al. 2011, Aquacult Environ Interact", doi: "10.3354/aei00024", n: "Hydrozoan jellyfish and gill disorders" },
+    kube12: { c: "Kube et al. 2012, Aquaculture", doi: "10.1016/j.aquaculture.2012.08.026", n: "Genetic variation in AGD resistance" },
+    robledo18: { c: "Robledo et al. 2018, G3", doi: "10.1534/g3.118.200075", n: "GWAS and genomic selection for AGD resistance" },
+    ajasa24: { c: "Ajasa et al. 2024, Aquaculture", doi: "10.1016/j.aquaculture.2023.740078", n: "Genomic prediction of AGD resistance" },
+    good09: { c: "Good et al. 2009, Prev Vet Med", doi: "10.1016/j.prevetmed.2009.05.028", n: "Rearing-unit factors and bacterial gill disease" },
+    good10: { c: "Good et al. 2010, Prev Vet Med", doi: "10.1016/j.prevetmed.2010.02.014", n: "Nested case-control study of BGD outbreaks" },
+    steinum10: { c: "Steinum et al. 2010, Dis Aquat Org", doi: "10.3354/dao02266", n: "Microbial findings in proliferative gill inflammation" },
+    wright15: { c: "Wright et al. 2015, Aquacult Environ Interact", doi: "10.3354/aei00137", n: "Depth distribution of N. perurans in cages" },
+    wright17: { c: "Wright et al. 2017, Prev Vet Med", doi: "10.1016/j.prevetmed.2017.03.002", n: "Snorkel barrier cages reduced N. perurans" },
+    wright18: { c: "Wright et al. 2018, Aquacult Environ Interact", doi: "10.3354/aei00269", n: "Freshwater surface layer and AGD" },
+    dalum26: { c: "Dalum et al. 2026, Aquacult Rep", doi: "10.1016/j.aqrep.2026.103449", n: "Respiratory frequency as a gill health proxy" },
+    young07: { c: "Young et al. 2007, Int J Parasitol", doi: "10.1016/j.ijpara.2007.04.018", n: "N. perurans described as the AGD agent" },
+  };
+  const refLink = k => { const r = REFS[k]; if (!r) return k; return r.doi ? `<a href="https://doi.org/${r.doi}" target="_blank" rel="noopener">${r.c}</a>` : r.c; };
+
+  // ---------------- agents ----------------
+  const AGENTS = [
+    { id: "npe", name: "Neoparamoeba perurans", cond: "Amoebic gill disease (AGD)" },
+    { id: "sgpv", name: "Salmon gill poxvirus", cond: "SGPV disease" },
+    { id: "bcy", name: "Ca. Branchiomonas cysticola", cond: "Epitheliocystis / CGD" },
+    { id: "pis", name: "Ca. Piscichlamydia salmonis", cond: "Epitheliocystis / CGD" },
+    { id: "dle", name: "Desmozoon lepeophtherii", cond: "Microsporidiosis / CGD" },
+    { id: "ten", name: "Tenacibaculum / Flavobacterium", cond: "Bacterial gill disease" },
+  ];
+
+  // ---------------- risk factors ----------------
+  // grade: strong (>=2 field studies), moderate (1 field study), limited (experimental/descriptive)
+  const FACTORS = [
+    { g: "Environment", id: "temp", name: "Seawater temperature", grade: "strong", dir: "up", refs: ["jones22", "kintner19", "herrero22"], eff: "Higher temperature exacerbated CGD; hydrozoan blooms above 12 °C", opts: [["Below 10 °C", 0], ["10-12 °C", 1], ["Above 12 °C", 3]] },
+    { g: "Environment", id: "sal", name: "Salinity and rainfall", grade: "moderate", dir: "up", refs: ["rozas12", "jones22"], eff: "AGD more likely at ≥32 ppt with low rainfall; salinity effect only with N. perurans present", opts: [["Below 32 ppt or recent heavy rain", 0], ["32 ppt or more, little rain", 2]] },
+    { g: "Environment", id: "plank", name: "Jellyfish, hydrozoan or algal bloom (last 14 days)", grade: "strong", dir: "up", refs: ["baxter11", "mitchell12", "kintner19"], eff: "Hydrozoan abundance correlated with daily mortality and gill pathology", opts: [["None recorded", 0], ["Recorded at or near the site", 3]] },
+    { g: "Environment", id: "season", name: "Season", grade: "strong", dir: "up", refs: ["rozas12", "herrero22"], eff: "AGD and gill disease peak in summer and autumn; scored low because it overlaps with temperature", opts: [["Winter or spring", 0], ["Summer or autumn", 1]] },
+    { g: "Environment", id: "oxy", name: "Dissolved oxygen", grade: "limited", dir: "up", refs: [], eff: "Hypoxia worsened gill responses in experiments", opts: [["Normal", 0], ["Low episodes recorded", 1]] },
+    { g: "Agents", id: "npe", name: "N. perurans on gills (qPCR)", grade: "strong", dir: "up", refs: ["herrero22", "downes15", "jones22"], eff: "N. perurans load associated with higher gill scores", opts: [["Not detected or not tested", 0], ["Detected", 3]] },
+    { g: "Agents", id: "coinf", name: "Ca. B. cysticola or D. lepeophtherii at high load", grade: "strong", dir: "up", refs: ["herrero22", "steinum10", "ostevik22"], eff: "Higher loads in fish with PGI/CGD and after delousing", opts: [["No", 0], ["Yes", 2]] },
+    { g: "Agents", id: "multi", name: "Two or more gill agents detected", grade: "moderate", dir: "up", refs: ["herrero22", "downes18"], eff: "Co-infection common in CGD; association inconsistent across farms; overlaps with the agent factors above", opts: [["No", 0], ["Yes", 1]] },
+    { g: "Agents", id: "status", name: "Current gill status in this cage", grade: "linked", dir: "up", refs: ["good09", "good10"], eff: "Recent disease and mortality predicted further outbreaks (hatchery BGD)", opts: [["No cases", 0], ["Suspect cases", 2], ["Probable or confirmed cases", 3]] },
+    { g: "Host", id: "size", name: "Fish weight", grade: "moderate", dir: "up", refs: ["rozas12"], eff: "AGD risk 3.7-6.2 times higher for fish over 300 g (jointly with season and region)", opts: [["300 g or less", 0], ["Over 300 g", 2]] },
+    { g: "Host", id: "gen", name: "Stock selected for AGD resistance", grade: "strong", dir: "down", refs: ["taylor09g", "kube12", "robledo18", "ajasa24"], eff: "Heritability of AGD resistance and gill score 0.06-0.56", opts: [["No or unknown", 0], ["Yes", -2]] },
+    { g: "Host", id: "smolt", name: "Smolts from saltwater RAS", grade: "limited", dir: "up", refs: [], eff: "Higher gill scores in a saltwater than a freshwater RAS", opts: [["No", 0], ["Yes", 1]] },
+    { g: "Husbandry", id: "deluse", name: "Thermal or mechanical delousing (last 14 days)", grade: "moderate", dir: "up", refs: ["ostevik22", "elsh24"], eff: "Increased gill damage and Ca. B. cysticola load", opts: [["No", 0], ["Yes", 2]] },
+    { g: "Husbandry", id: "net", name: "In-situ net cleaning (last 7 days)", grade: "strong", dir: "up", refs: ["ostevik21", "elsh23"], eff: "Gill thrombi OR 2.36 (1.21-5.71) one day after cleaning moderately fouled nets", opts: [["No", 0], ["Yes, light fouling", 1], ["Yes, moderate or heavy fouling", 2]] },
+    { g: "Husbandry", id: "h2o2", name: "Hydrogen peroxide treatment (last 14 days)", grade: "limited", dir: "up", refs: [], eff: "Mucosal and oxidative changes in experiments", opts: [["No", 0], ["Yes", 1]] },
+    { g: "Husbandry", id: "fwbath", name: "Freshwater bath completed (last 14 days)", grade: "moderate", dir: "down", refs: ["downes15", "wright18"], eff: "Reduced AGD; response varies after bathing", opts: [["No", 0], ["Yes", -1]] },
+    { g: "Husbandry", id: "snorkel", name: "Snorkel cage or freshwater surface layer", grade: "moderate", dir: "down", refs: ["wright17", "wright18"], eff: "Lower N. perurans levels in commercial snorkel cages", opts: [["No", 0], ["Yes", -1]] },
+    { g: "Husbandry", id: "mort", name: "Mortality above usual in the previous week", grade: "moderate", dir: "up", refs: ["good09", "good10"], eff: "Prior-week mortality and treatment predicted BGD outbreaks", opts: [["No", 0], ["Yes", 2]] },
+  ];
+
+  // ---------------- defaults & persistence ----------------
+  const DEFAULT_CFG = { gross: 2, histo: 2, ext: 10, ctpos: 35, cthigh: 30, low: 4, mod: 10, pts: {} };
+  FACTORS.forEach(f => { DEFAULT_CFG.pts[f.id] = f.opts.map(o => o[1]); });
+  const KEY = "ghi-calc-v1";
+  const load = () => { try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); return s && typeof s === "object" ? s : null; } catch (e) { return null; } };
+  const saveCfg = () => { try { localStorage.setItem(KEY, JSON.stringify(CFG)); } catch (e) { /* storage unavailable */ } };
+  const clone = o => JSON.parse(JSON.stringify(o));
+  let CFG = clone(DEFAULT_CFG);
+  const stored = load();
+  if (stored) { Object.assign(CFG, stored); CFG.pts = Object.assign(clone(DEFAULT_CFG.pts), stored.pts || {}); }
+
+  const $ = id => document.getElementById(id);
+  const TIER_INFO = {
+    none: { label: "Not a case", c: "var(--t-none)", step: 1 },
+    insufficient: { label: "Not enough data", c: "var(--t-none)", step: 0 },
+    suspect: { label: "Suspect case", c: "var(--t-suspect)", step: 2 },
+    probable: { label: "Probable case", c: "var(--t-probable)", step: 3 },
+    confirmed: { label: "Confirmed case", c: "var(--t-confirmed)", step: 4 },
+    multi: { label: "Multifactorial gill disease", c: "var(--t-multi)", step: 5 },
+  };
+
+  // ---------------- build case form ----------------
+  document.querySelectorAll(".hsel").forEach(sel => {
+    sel.innerHTML = `<option value="">Not examined</option><option value="0">0 · none</option><option value="1">1 · mild</option><option value="2">2 · moderate</option><option value="3">3 · severe</option>`;
+  });
+  const tbody = $("agentTable").querySelector("tbody");
+  tbody.innerHTML = AGENTS.map(a => `<tr>
+      <td>${a.name}<span class="cond">${a.cond}</span></td>
+      <td><select id="a_${a.id}_q" aria-label="${a.name} qPCR"><option value="nt">Not tested</option><option value="neg">Negative</option><option value="pos">Positive</option></select></td>
+      <td><input type="number" id="a_${a.id}_ct" min="10" max="45" step="0.1" placeholder="Ct" aria-label="${a.name} Ct value"></td>
+      <td><select id="a_${a.id}_ish" aria-label="${a.name} in situ"><option value="nd">Not done</option><option value="in">In lesion</option><option value="out">Not in lesion</option></select></td>
+    </tr>`).join("");
+
+  const EXAMPLE_CASE = { c_resp: true, c_mort: false, c_app: true, c_leth: false, g_scale: "agd", g_score: "3", h_hyp: "2", h_inf: "1", h_nec: "1", h_circ: "0", h_ext: "25",
+    a_npe_q: "pos", a_npe_ct: "26.4", a_npe_ish: "nd", a_bcy_q: "pos", a_bcy_ct: "32.1", a_bcy_ish: "nd", a_dle_q: "neg", a_sgpv_q: "neg", x_treat: false, x_net: false, x_plank: false, x_fw: false };
+  const caseFields = () => Array.from($("caseForm").querySelectorAll("input:not([id^=s_]), select"));
+  function setCase(obj) {
+    caseFields().forEach(el => {
+      const v = obj[el.id];
+      if (el.type === "checkbox") el.checked = !!v;
+      else if (v !== undefined) el.value = v;
+      else el.value = el.tagName === "SELECT" ? el.options[0].value : "";
+    });
+  }
+  const num = v => (v === "" || v === null || v === undefined || isNaN(+v)) ? null : +v;
+
+  function classify() {
+    const R = [], gaps = [];
+    const g = num($("g_score").value);
+    const clin = ["c_resp", "c_mort"].filter(id => $(id).checked);
+    const otherClin = ["c_app", "c_leth"].filter(id => $(id).checked);
+    const grades = ["h_hyp", "h_inf", "h_nec", "h_circ"].map(id => num($(id).value));
+    const ext = num($("h_ext").value);
+    const histoDone = grades.some(x => x !== null) || ext !== null;
+    const maxG = Math.max(...grades.map(x => x ?? -1));
+    const compatible = histoDone && (maxG >= CFG.histo || (ext !== null && ext >= CFG.ext));
+    const suspect = (g !== null && g >= CFG.gross) || clin.length > 0;
+
+    if (g !== null) R.push([g >= CFG.gross ? "ok" : "no", `Gross gill score ${g} ${g >= CFG.gross ? "≥" : "<"} ${CFG.gross}`]);
+    else gaps.push("Gross gill examination not recorded");
+    if (clin.length) R.push(["ok", `Clinical sign: ${clin.map(id => id === "c_resp" ? "respiratory signs" : "raised mortality").join(", ")}`]);
+    if (otherClin.length && !clin.length) R.push(["no", "Reduced appetite or lethargy alone do not meet the suspect criterion"]);
+    if (histoDone) {
+      const parts = [];
+      if (maxG >= 0) parts.push(`highest lesion grade ${maxG}`);
+      if (ext !== null) parts.push(`${ext}% filaments affected`);
+      R.push([compatible ? "ok" : "no", `Histology ${compatible ? "compatible" : "not compatible"}: ${parts.join(", ")} (threshold grade ≥ ${CFG.histo} or ≥ ${CFG.ext}%)`]);
+    } else gaps.push("Histopathology not done: the status cannot pass Suspect");
+
+    const agentRes = AGENTS.map(a => {
+      const q = $(`a_${a.id}_q`).value, ct = num($(`a_${a.id}_ct`).value), ish = $(`a_${a.id}_ish`).value;
+      const detected = q === "pos" && (ct === null || ct < CFG.ctpos);
+      const high = detected && ct !== null && ct <= CFG.cthigh;
+      const inLesion = ish === "in";
+      return { a, q, ct, ish, detected: detected || inLesion, meets: high || inLesion, high, inLesion };
+    });
+    const tested = agentRes.filter(x => x.q !== "nt" || x.ish !== "nd");
+    const det = agentRes.filter(x => x.detected), meets = agentRes.filter(x => x.meets);
+    det.forEach(x => R.push([x.meets ? "ok" : "no", `${x.a.name}: ${x.inLesion ? "in lesion by ISH/IHC" : ""}${x.inLesion && x.ct !== null ? ", " : ""}${x.ct !== null ? "Ct " + x.ct + (x.high ? " (high load)" : " (below high-load cut-off)") : (x.inLesion ? "" : "positive, Ct not given")}`]));
+    if (!tested.length) gaps.push("No agent testing recorded");
+
+    const ctx = [];
+    if ($("x_treat").checked) ctx.push("recent treatment");
+    if ($("x_net").checked) ctx.push("recent net cleaning");
+    if ($("x_plank").checked) ctx.push("plankton or jellyfish event");
+
+    let tier, sub = "", action = "";
+    if (compatible) {
+      if (meets.length >= 2 || (meets.length === 0 && det.length >= 2)) {
+        tier = "multi";
+        sub = `Compatible lesions with ${det.length} agents detected${meets.length ? `, ${meets.length} at high load or in lesion` : " at low load"}${ctx.length ? "; context: " + ctx.join(", ") : ""}.`;
+        action = "Record as multifactorial (CGD). Report all agents with Ct values, the dominant lesion pattern and the environmental and treatment context. Use ISH on the main agents to see which ones sit in the lesions.";
+      } else if (meets.length === 1) {
+        tier = "confirmed";
+        const m = meets[0];
+        sub = `${m.a.cond}: ${m.a.name} ${m.inLesion ? "localised to the lesion" : "at high load"} with compatible histology.${det.length > 1 ? " Other agents detected at low load are recorded as co-detections." : ""}`;
+        action = m.inLesion ? "Confirmed by agent localisation. Follow the cage with gross scoring and qPCR to track progression and response to treatment." : "Confirmed on load. ISH or IHC on a subset of fish would strengthen the confirmation and rule out a passenger agent.";
+      } else {
+        tier = "probable";
+        if (det.length === 1) { sub = `Compatible lesions; ${det[0].a.name} detected below the high-load cut-off.`; action = "Run ISH/IHC for this agent, or re-test more fish, to decide between a confirmed and a multifactorial case."; }
+        else if (ctx.length) { sub = `Compatible lesions, no agent detected; context suggests a non-infectious cause (${ctx.join(", ")}).`; action = "Record as probable, non-infectious cause suspected. Check lesion pattern against the event (thrombi after net cleaning, necrosis after treatment or jellyfish) and re-examine in 1-2 weeks."; }
+        else { sub = tested.length ? "Compatible lesions, no listed agent detected." : "Compatible lesions; agents not yet tested."; action = tested.length ? "Extend the qPCR panel or use histology to look for other agents; record environmental context." : "Test gill tissue with the qPCR panel and, if possible, ISH to assign an aetiology."; }
+      }
+    } else if (suspect) {
+      tier = "suspect";
+      sub = histoDone ? "Gross or clinical signs present, but histology did not meet the lesion threshold." : "Gross or clinical signs present; no histology yet.";
+      action = histoDone ? "Re-sample more fish; consider whether the gross score reflects lesions histology missed (sampling site) or early disease." : `Fix gills from at least 5 fish with score ≥ ${CFG.gross} for histology, and run the qPCR panel on paired samples.`;
+    } else if (g === null && !histoDone && !clin.length && !tested.length) {
+      tier = "insufficient"; sub = "Enter at least a gross gill score or clinical signs."; action = "Start with gross gill scoring of 10 or more fish per cage.";
+    } else {
+      tier = "none"; sub = "Criteria for a suspect case are not met."; action = "Continue routine gill scoring at the site's usual frequency.";
+      if (det.length) action = "Agent detected without lesions or signs: record as infection without disease and re-score within 1-2 weeks.";
+    }
+    return { tier, sub, action, reasons: R, gaps };
+  }
+
+  function renderCase() {
+    const r = classify(), info = TIER_INFO[r.tier];
+    const card = $("tierCard");
+    card.style.setProperty("--c", info.c);
+    $("tierBadge").style.setProperty("--c", info.c);
+    $("tierText").textContent = info.label;
+    $("tierSub").textContent = r.sub;
+    $("ladder").querySelectorAll("span").forEach((s, i) => { s.classList.toggle("on", i < info.step); s.style.setProperty("--c", info.c); });
+    $("reasons").innerHTML = r.reasons.map(([k, t]) => `<li class="${k}" data-mark="${k === "ok" ? "✓" : "·"}">${t}</li>`).join("") + r.gaps.map(t => `<li class="gap" data-mark="!">${t}</li>`).join("");
+    $("caseAction").textContent = r.action;
+    LAST_CASE = r;
+    return r;
+  }
+  let LAST_CASE = null;
+
+  // ---------------- case settings ----------------
+  const bindSetting = (id, key) => {
+    const el = $(id); el.value = CFG[key];
+    el.addEventListener("input", () => { const v = num(el.value); if (v !== null) { CFG[key] = v; saveCfg(); renderCase(); renderRisk(); } });
+  };
+  bindSetting("s_gross", "gross"); bindSetting("s_histo", "histo"); bindSetting("s_ext", "ext"); bindSetting("s_ctpos", "ctpos"); bindSetting("s_cthigh", "cthigh");
+
+  $("caseForm").addEventListener("input", e => { if (!e.target.id.startsWith("s_")) { $("caseExample").hidden = true; } renderCase(); });
+  $("caseForm").addEventListener("change", () => renderCase());
+  $("caseForm").addEventListener("submit", e => e.preventDefault());
+  $("caseClear").addEventListener("click", () => { setCase({}); $("caseExample").hidden = true; renderCase(); });
+
+  // ---------------- risk form ----------------
+  const GRADE_LABEL = { strong: "Strong · ≥2 field studies", moderate: "Moderate · 1 field study", limited: "Limited · experimental only", linked: "Linked to case tab" };
+  const groups = [...new Set(FACTORS.map(f => f.g))];
+  $("factorGroups").innerHTML = groups.map(g => `<fieldset><legend>${g}</legend>${FACTORS.filter(f => f.g === g).map(f => `
+      <div class="factor">
+        <div><label class="name" for="f_${f.id}">${f.name}</label>
+          <div class="meta"><span class="chip ${f.grade === "linked" ? "linked" : "g-" + f.grade}">${GRADE_LABEL[f.grade]}</span><span class="chip">${f.dir === "up" ? "↑ raises risk" : "↓ lowers risk"}</span></div></div>
+        <select id="f_${f.id}">${f.opts.map((o, i) => `<option value="${i}">${o[0]}</option>`).join("")}</select>
+      </div>`).join("")}</fieldset>`).join("");
+  const EXAMPLE_RISK = { temp: 2, sal: 1, plank: 0, season: 1, oxy: 0, npe: 1, coinf: 0, multi: 1, status: 0, size: 1, gen: 0, smolt: 0, deluse: 0, net: 2, h2o2: 0, fwbath: 0, snorkel: 0, mort: 0 };
+  FACTORS.forEach(f => { $("f_" + f.id).value = String(EXAMPLE_RISK[f.id] ?? 0); });
+
+  function buildPtsTable() {
+    $("ptsTable").querySelector("tbody").innerHTML = FACTORS.map(f => f.opts.map((o, i) => `<tr>${i === 0 ? `<td rowspan="${f.opts.length}">${f.name}</td>` : ""}<td>${o[0]}</td><td><input type="number" step="0.5" data-f="${f.id}" data-i="${i}" value="${CFG.pts[f.id][i]}" aria-label="Points for ${f.name}: ${o[0]}"></td></tr>`).join("")).join("");
+  }
+  buildPtsTable();
+  $("ptsTable").addEventListener("input", e => { const t = e.target; if (t.dataset.f) { const v = num(t.value); if (v !== null) { CFG.pts[t.dataset.f][+t.dataset.i] = v; saveCfg(); renderRisk(); } } });
+  $("s_low").value = CFG.low; $("s_mod").value = CFG.mod;
+  $("s_low").addEventListener("input", e => { const v = num(e.target.value); if (v !== null) { CFG.low = v; saveCfg(); renderRisk(); } });
+  $("s_mod").addEventListener("input", e => { const v = num(e.target.value); if (v !== null) { CFG.mod = v; saveCfg(); renderRisk(); } });
+  $("riskForm").addEventListener("change", renderRisk);
+  $("riskForm").addEventListener("submit", e => e.preventDefault());
+
+  function renderRisk() {
+    const parts = FACTORS.map(f => { const i = +$("f_" + f.id).value; return { f, i, ans: f.opts[i][0], p: CFG.pts[f.id][i] }; });
+    const score = parts.reduce((s, x) => s + x.p, 0);
+    const maxS = FACTORS.reduce((s, f) => s + Math.max(...CFG.pts[f.id]), 0);
+    const minS = FACTORS.reduce((s, f) => s + Math.min(...CFG.pts[f.id]), 0);
+    const band = score <= CFG.low ? ["Low", "var(--band-low)"] : score <= CFG.mod ? ["Moderate", "var(--band-mod)"] : ["High", "var(--band-high)"];
+    $("scoreNum").textContent = (Math.round(score * 10) / 10).toString();
+    const pill = $("bandPill"); pill.textContent = band[0] + " risk"; pill.style.setProperty("--c", band[1]);
+    const span = Math.max(1, maxS - minS), pos = v => Math.min(100, Math.max(0, (v - minS) / span * 100));
+    const meter = $("meter"); meter.style.setProperty("--l", pos(CFG.low + 0.5) + "%"); meter.style.setProperty("--m", pos(CFG.mod + 0.5) + "%");
+    $("meterMark").style.left = pos(score) + "%";
+    $("meterScale").innerHTML = `<span>${minS}</span><span style="text-align:center">score range</span><span style="text-align:right">${maxS}</span>`;
+    const nz = parts.filter(x => x.p !== 0).sort((a, b) => Math.abs(b.p) - Math.abs(a.p));
+    const mx = Math.max(1, ...nz.map(x => Math.abs(x.p)));
+    $("contrib").innerHTML = nz.length ? nz.map(x => `<div class="c"><span>${x.f.name}<span class="muted"> · ${x.ans}</span></span><span class="bar"><b class="${x.p < 0 ? "neg" : ""}" style="width:${Math.abs(x.p) / mx * 100}%"></b></span><span class="pts">${x.p > 0 ? "+" : ""}${x.p}</span></div>`).join("") : `<p class="muted small">No factor adds points for this cage.</p>`;
+    const act = band[0] === "High"
+      ? `Score gills of at least 10 fish per cage weekly. Fix fish with score ≥ ${CFG.gross} for histology and run the qPCR panel, so new cases can be classified to Probable or Confirmed. Where possible, postpone non-urgent delousing and net cleaning, and watch oxygen and plankton.`
+      : band[0] === "Moderate"
+      ? `Score gills every two weeks and run the qPCR panel on a sample. Sample for histology as soon as a suspect case appears.`
+      : `Keep routine gill scoring and environmental monitoring.`;
+    $("riskAction").textContent = act;
+    // summary
+    const c = LAST_CASE || classify();
+    const lines = [
+      `GHI Calculator (draft v0.1) · ${new Date().toISOString().slice(0, 10)}`,
+      `Case status: ${TIER_INFO[c.tier].label}. ${c.sub}`,
+      `Risk score: ${Math.round(score * 10) / 10} (${band[0]}; bands ≤${CFG.low} low, ≤${CFG.mod} moderate)`,
+      `Contributors: ${nz.map(x => `${x.f.name} = ${x.ans} (${x.p > 0 ? "+" : ""}${x.p})`).join("; ") || "none"}`,
+      `Suggested surveillance: ${act}`,
+      `Thresholds: gross ≥${CFG.gross}; histology grade ≥${CFG.histo} or ≥${CFG.ext}% filaments; qPCR positive Ct <${CFG.ctpos}, high load Ct ≤${CFG.cthigh}.`,
+    ];
+    $("summary").value = lines.join("\n");
+  }
+
+  // link case status into risk factor
+  $("toRisk").addEventListener("click", () => {
+    const r = classify();
+    const idx = r.tier === "suspect" ? 1 : (["probable", "confirmed", "multi"].includes(r.tier) ? 2 : 0);
+    $("f_status").value = String(idx);
+    // agents detected -> factors
+    const det = AGENTS.filter(a => $(`a_${a.id}_q`).value === "pos" || $(`a_${a.id}_ish`).value === "in");
+    $("f_npe").value = det.some(a => a.id === "npe") ? "1" : "0";
+    $("f_multi").value = det.length >= 2 ? "1" : "0";
+    const hi = AGENTS.filter(a => ["bcy", "dle"].includes(a.id)).some(a => { const ct = num($(`a_${a.id}_ct`).value); return ($(`a_${a.id}_q`).value === "pos" && ct !== null && ct <= CFG.cthigh) || $(`a_${a.id}_ish`).value === "in"; });
+    $("f_coinf").value = hi ? "1" : "0";
+    $("f_deluse").value = $("x_treat").checked ? "1" : $("f_deluse").value;
+    $("f_net").value = $("x_net").checked && $("f_net").value === "0" ? "2" : $("f_net").value;
+    $("f_plank").value = $("x_plank").checked ? "1" : $("f_plank").value;
+    renderRisk(); showTab("risk");
+  });
+
+  $("copyBtn").addEventListener("click", () => {
+    const ta = $("summary"), msg = $("copyMsg");
+    const done = () => { msg.textContent = "Copied"; setTimeout(() => msg.textContent = "", 2000); };
+    const fallback = () => { ta.focus(); ta.select(); msg.textContent = "Selected; press Ctrl/Cmd+C"; };
+    try { navigator.clipboard.writeText(ta.value).then(done, fallback); } catch (e) { fallback(); }
+  });
+
+  // ---------------- tiers & evidence ----------------
+  function renderTiers() {
+    const T = [
+      ["none", "Not a case", `No clinical signs, gross score below ${CFG.gross}, and no compatible lesion when histology is done. An agent detected without lesions is recorded as infection, not disease.`, ""],
+      ["suspect", "Suspect case", `Gross gill score ≥ ${CFG.gross} on the scale in use, or respiratory signs, or mortality above the site's usual level.`, "taylor09 fridman21 dalum26"],
+      ["probable", "Probable case", `Compatible histopathology on a semi-quantitative scheme: any key lesion graded ≥ ${CFG.histo} (moderate) or ≥ ${CFG.ext}% of filaments affected. Applies with or without gross signs.`, "mitchell12 gjessing19 amlie25"],
+      ["confirmed", "Confirmed, aetiology-specific", `Probable case plus one agent shown within the lesion by ISH/IHC, or detected by qPCR at high load (Ct ≤ ${CFG.cthigh}). Named by the agent, e.g. confirmed AGD.`, "young07 boerlage22 downes15"],
+      ["multi", "Multifactorial (CGD)", `Probable case with two or more agents meeting the confirmation criterion, or several agents at low load with no dominant one. Recorded with environmental and treatment context.`, "herrero22 gjessing19 downes18"],
+    ];
+    $("tierDefs").innerHTML = T.map(([k, h, d, r]) => `<div class="tdef"><div class="h" style="--c:${TIER_INFO[k].c}"><span class="dot"></span>${h}</div><div><p>${d}</p>${r ? `<p class="small muted" style="margin-top:6px">Builds on: ${r.split(" ").map(refLink).join("; ")}</p>` : ""}</div></div>`).join("");
+  }
+  function renderEvidence() {
+    $("evTable").querySelector("tbody").innerHTML = FACTORS.map(f => `<tr><td>${f.name}</td><td class="${f.dir === "up" ? "dir-up" : "dir-down"}">${f.dir === "up" ? "↑ raises" : "↓ lowers"}</td><td><span class="chip ${f.grade === "linked" ? "linked" : "g-" + f.grade}">${GRADE_LABEL[f.grade].split(" · ")[0]}</span></td><td>${f.eff}</td><td>${f.refs.length ? f.refs.map(refLink).join("<br>") : '<span class="muted">Experimental studies only</span>'}</td></tr>`).join("");
+    const cd = ["taylor09", "fridman21", "mitchell12", "amlie25", "gjessing19", "boerlage22", "herrero22", "downes15", "dalum26"];
+    $("cdRefs").innerHTML = cd.map(k => `<li>${refLink(k)}: ${REFS[k].n}</li>`).join("");
+  }
+
+  // ---------------- tabs ----------------
+  const TABS = ["case", "risk", "tiers", "evidence"];
+  function showTab(t) {
+    if (!TABS.includes(t)) t = "case";
+    TABS.forEach(x => { $("p-" + x).hidden = x !== t; $("tab-" + x).setAttribute("aria-selected", String(x === t)); });
+    if (t === "tiers") renderTiers();
+    try { history.replaceState(null, "", "#" + t); } catch (e) { /* ignore */ }
+  }
+  document.querySelectorAll("nav.tabs button").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+
+  $("resetAll").addEventListener("click", () => {
+    CFG = clone(DEFAULT_CFG); saveCfg();
+    ["gross", "histo", "ext", "ctpos", "cthigh"].forEach(k => { $("s_" + k).value = CFG[k]; });
+    $("s_low").value = CFG.low; $("s_mod").value = CFG.mod;
+    buildPtsTable(); renderCase(); renderRisk(); renderTiers();
+    $("resetMsg").textContent = "Defaults restored"; setTimeout(() => $("resetMsg").textContent = "", 2000);
+  });
+
+  // ---------------- init ----------------
+  setCase(EXAMPLE_CASE);
+  renderCase(); renderRisk(); renderTiers(); renderEvidence();
+  showTab((location.hash || "").replace("#", ""));
+})();
+</script>
+</body>
+</html>
