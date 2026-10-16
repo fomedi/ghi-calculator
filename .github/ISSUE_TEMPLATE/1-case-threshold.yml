@@ -1,1 +1,75 @@
-
+name: Case definition – threshold or tier
+description: Propose a change to a case-definition threshold or to how a tier is assigned.
+title: "[Case] "
+labels: ["delphi", "case-definition"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reviewing the draft GHI case definition. One proposal per issue makes the Delphi rounds easier to tally.
+        See the current criteria at https://fomedi.github.io/ghi-calculator/#tiers
+  - type: dropdown
+    id: criterion
+    attributes:
+      label: Which criterion?
+      options:
+        - Suspect case – gross gill score threshold (currently ≥ 2)
+        - Suspect case – clinical signs that qualify
+        - Probable case – histology grade threshold (currently ≥ 2, moderate)
+        - Probable case – % filaments affected (currently ≥ 10%)
+        - Probable case – which lesions count
+        - Confirmed case – qPCR positive cut-off (currently Ct < 35)
+        - Confirmed case – high-load cut-off (currently Ct ≤ 30)
+        - Confirmed case – role of ISH/IHC
+        - Multifactorial (CGD) – rule for several agents
+        - Gross gill scale (AGD 0-5 vs total gill score)
+        - Agent panel (add or remove an agent)
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: proposal
+    attributes:
+      label: Proposed value or rule
+      placeholder: e.g. "gross score ≥ 3 for AGD scale, ≥ 2 for total gill score"
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale
+      description: Field experience, data, or published evidence behind the proposal.
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References (DOIs if possible)
+  - type: dropdown
+    id: agreement
+    attributes:
+      label: How strongly do you support this change?
+      options:
+        - 5 – essential
+        - 4 – strongly agree
+        - 3 – agree
+        - 2 – unsure
+        - 1 – minor preference
+    validations:
+      required: true
+  - type: dropdown
+    id: role
+    attributes:
+      label: Your main expertise
+      options:
+        - Fish pathologist / histopathologist
+        - Veterinarian (fish health)
+        - Epidemiologist
+        - Laboratory diagnostics (qPCR, ISH)
+        - Farm health manager / industry
+        - Researcher (other)
+  - type: input
+    id: region
+    attributes:
+      label: Production region you work in
+      placeholder: e.g. Norway, Scotland, Chile, Tasmania

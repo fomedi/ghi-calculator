@@ -1,1 +1,91 @@
-
+name: Risk calculator – factor or points
+description: Propose new points, a new factor, or a change to the risk bands.
+title: "[Risk] "
+labels: ["delphi", "risk-calculator"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The draft points follow the evidence grade (3 strong, 2 moderate, 1 limited). The panel's job is to replace them with agreed weights.
+        See the factors at https://fomedi.github.io/ghi-calculator/#risk and their evidence at https://fomedi.github.io/ghi-calculator/#evidence
+  - type: dropdown
+    id: factor
+    attributes:
+      label: Which factor?
+      options:
+        - Seawater temperature
+        - Salinity and rainfall
+        - Jellyfish, hydrozoan or algal bloom
+        - Season
+        - Dissolved oxygen
+        - N. perurans on gills (qPCR)
+        - Ca. B. cysticola or D. lepeophtherii at high load
+        - Two or more gill agents detected
+        - Current gill status in this cage
+        - Fish weight
+        - Stock selected for AGD resistance
+        - Smolts from saltwater RAS
+        - Thermal or mechanical delousing
+        - In-situ net cleaning
+        - Hydrogen peroxide treatment
+        - Freshwater bath
+        - Snorkel cage or freshwater surface layer
+        - Mortality above usual in the previous week
+        - Risk bands (low / moderate / high cut-offs)
+        - New factor (describe below)
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed points, categories or cut-offs
+      placeholder: |
+        e.g. Temperature: below 10 °C = 0; 10-14 °C = 1; above 14 °C = 3
+    validations:
+      required: true
+  - type: dropdown
+    id: direction
+    attributes:
+      label: Effect on gill disease risk
+      options:
+        - Raises risk
+        - Lowers risk
+        - No effect – remove the factor
+        - Depends on context
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale and evidence
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References (DOIs if possible)
+  - type: dropdown
+    id: agreement
+    attributes:
+      label: How strongly do you support this change?
+      options:
+        - 5 – essential
+        - 4 – strongly agree
+        - 3 – agree
+        - 2 – unsure
+        - 1 – minor preference
+    validations:
+      required: true
+  - type: dropdown
+    id: role
+    attributes:
+      label: Your main expertise
+      options:
+        - Fish pathologist / histopathologist
+        - Veterinarian (fish health)
+        - Epidemiologist
+        - Laboratory diagnostics (qPCR, ISH)
+        - Farm health manager / industry
+        - Researcher (other)
+  - type: input
+    id: region
+    attributes:
+      label: Production region you work in

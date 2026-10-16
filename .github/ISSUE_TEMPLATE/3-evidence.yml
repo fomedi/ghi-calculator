@@ -1,1 +1,36 @@
-
+name: Suggest a publication
+description: Point us to a study the review or the evidence table should include.
+title: "[Evidence] "
+labels: ["evidence"]
+body:
+  - type: input
+    id: citation
+    attributes:
+      label: Citation or DOI
+      placeholder: e.g. 10.1111/jfd.12345
+    validations:
+      required: true
+  - type: dropdown
+    id: topic
+    attributes:
+      label: What does it inform?
+      multiple: true
+      options:
+        - Case definition – gross scoring
+        - Case definition – histopathology
+        - Case definition – agent detection / thresholds
+        - Diagnostic test accuracy or observer agreement
+        - Risk factor – environment
+        - Risk factor – agents / co-infection
+        - Risk factor – host
+        - Risk factor – husbandry / treatments
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: finding
+    attributes:
+      label: Key finding
+      description: Direction and size of the effect, study design, country and production stage if known.
+    validations:
+      required: true
