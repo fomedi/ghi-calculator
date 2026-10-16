@@ -281,6 +281,7 @@ footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line);
             <label>High load at or below Ct<input type="number" id="s_cthigh" min="15" max="40" step="0.5"></label>
           </div>
           <p class="small muted" style="margin-top:10px">Defaults are placeholders for the Delphi panel. Ct cut-offs depend on the assay; set them per laboratory.</p>
+          <p class="small" style="margin-top:8px"><a href="https://github.com/fomedi/ghi-calculator/issues/new?template=1-case-threshold.yml" target="_blank" rel="noopener">Propose a change to a threshold →</a></p>
         </details>
       </form>
 
@@ -324,6 +325,7 @@ footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line);
           </div>
           <div class="tablewrap"><table class="pts-table" id="ptsTable"><thead><tr><th>Factor</th><th>Answer</th><th>Points</th></tr></thead><tbody></tbody></table></div>
           <p class="small muted" style="margin-top:10px">Default points start from the evidence grade (3 for two or more supporting field studies, 2 for one field study, 1 for experimental evidence only; negative for protective factors) and are lowered where factors overlap: season with temperature, co-infection with N. perurans. Replace them with weights agreed by the expert panel.</p>
+          <p class="small" style="margin-top:8px"><a href="https://github.com/fomedi/ghi-calculator/issues/new?template=2-risk-factor.yml" target="_blank" rel="noopener">Propose new points or a new factor →</a></p>
         </details>
       </form>
 
@@ -363,6 +365,7 @@ footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line);
       <div class="tiers-def" style="margin-top:16px" id="tierDefs"></div>
     </div>
     <div class="card" style="margin-top:18px">
+      <p class="small" style="margin-bottom:10px"><a href="https://github.com/fomedi/ghi-calculator/issues/new?template=1-case-threshold.yml" target="_blank" rel="noopener">Comment on a tier or threshold →</a></p>
       <h3>Recorded at every tier</h3>
       <p class="muted" style="margin-top:6px;max-width:72ch">Production stage (freshwater, RAS or sea), water temperature and salinity, plankton and jellyfish events, treatments and net cleaning in the previous two weeks, and the scales and assays used. These records are what make cases comparable across farms and countries, and they are the inputs of the risk calculator.</p>
     </div>
@@ -382,12 +385,14 @@ footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line);
     </div>
     <div class="card" style="margin-top:18px">
       <h3>Case-definition sources</h3>
+      <p class="small" style="margin-top:4px"><a href="https://github.com/fomedi/ghi-calculator/issues/new?template=3-evidence.yml" target="_blank" rel="noopener">Suggest a publication we have missed →</a></p>
       <ul id="cdRefs" class="small" style="margin:10px 0 0;padding-left:18px;display:grid;gap:6px"></ul>
     </div>
   </section>
 
   <footer>
     <span>Draft tool for the GHI review (Mardones et al., in preparation). Not for diagnostic or regulatory use until thresholds and points are agreed and validated.</span>
+    <span>Expert feedback: <a href="https://github.com/fomedi/ghi-calculator/issues/new/choose" target="_blank" rel="noopener">open a comment on GitHub</a> (free GitHub account needed) · <a href="https://github.com/fomedi/ghi-calculator/issues/new?template=4-bug.yml" target="_blank" rel="noopener">report a problem</a></span>
     <span>Your edits to thresholds and points are kept in this browser only. <button class="btn" type="button" id="resetAll" style="padding:4px 10px;font-size:12.5px">Reset all to defaults</button> <span id="resetMsg" role="status"></span></span>
   </footer>
 </div>
