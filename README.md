@@ -31,3 +31,7 @@ Comments are collected as GitHub issues, using four forms:
 - **Something isn't working**: problems with the page
 
 Open one at https://github.com/fomedi/ghi-calculator/issues/new/choose (a free GitHub account is needed). Each form records the proposal, rationale, references, strength of support (1-5), expertise and region, so Delphi rounds can be tallied by label.
+
+## Contact
+
+Fernando Mardones, Royal (Dick) School of Veterinary Studies, University of Edinburgh: fmardone@ed.ac.uk
